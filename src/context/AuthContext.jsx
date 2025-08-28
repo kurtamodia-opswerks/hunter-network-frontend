@@ -32,28 +32,10 @@ export const AuthProvider = ({ children }) => {
 
     const refreshInterval = setInterval(() => {
       refreshToken();
-    }, 4 * 60 * 1000); // every 4 min (if access token lives ~5min)
+    }, 59 * 60 * 1000); // every 59 min (access token lives ~60min)
 
     return () => clearInterval(refreshInterval);
   }, [authTokens]);
-
-  const loginUser = async (username, password) => {
-    const response = await fetch("http://localhost:8000/api/token/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      setAuthTokens(data);
-      setUser(jwtDecode(data.access));
-      return true;
-    } else {
-      alert("Login failed!");
-      return false;
-    }
-  };
 
   // Refresh token
   const refreshToken = async () => {
@@ -75,6 +57,24 @@ export const AuthProvider = ({ children }) => {
       setUser(jwtDecode(data.access));
     } else {
       logoutUser();
+    }
+  };
+
+  const loginUser = async (username, password) => {
+    const response = await fetch("http://localhost:8000/api/token/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setAuthTokens(data);
+      setUser(jwtDecode(data.access));
+      return true;
+    } else {
+      alert("Login failed!");
+      return false;
     }
   };
 
