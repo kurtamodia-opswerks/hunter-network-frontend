@@ -5,14 +5,20 @@ export default function Hunters() {
   const [guilds, setGuilds] = useState([]);
 
   useEffect(() => {
+    let isMounted = true;
     // Fetch data when the component mounts
     let url = "http://localhost:8000/api/guilds/";
     fetchData(url)
-      .then((data) => setGuilds(data))
+      .then((data) => {
+        if (isMounted) {
+          setGuilds(data);
+        }
+      })
       .catch((error) => console.error("Error fetching data:", error));
 
     return () => {
       // Cleanup function, if needed
+      isMounted = false;
     };
   }, []);
 
