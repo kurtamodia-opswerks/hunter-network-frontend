@@ -1,22 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useAuthFetch } from "../hooks/useAuthFetch";
+import { AuthContext } from "../context/AuthContext.jsx";
 
 export default function Dungeons() {
   const [dungeons, setDungeons] = useState([]);
   const authFetch = useAuthFetch();
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchDungeons = async () => {
-      const res = await authFetch("http://localhost:8000/api/dungeons/");
-      if (res.ok) {
-        const data = await res.json();
-        if (data) {
-          setIsLoggedIn(true);
-        } else {
-          setIsLoggedIn(false);
-        }
+      if (!isLoggedIn) return; // prevent fetch if not logged in
+      const response = await authFetch("http://localhost:8000/api/dungeons/");
+      if (response.ok) {
+        const data = await response.json();
         setDungeons(data);
       } else {
         console.error("Failed to fetch dungeons");
@@ -24,11 +20,7 @@ export default function Dungeons() {
     };
 
     fetchDungeons();
-
-    return () => {
-      // Cleanup function, if needed
-    };
-  }, [authFetch]);
+  }, [authFetch, isLoggedIn]);
 
   return (
     <section>

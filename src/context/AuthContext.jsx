@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect } from "react";
+import jwtDecode from "jwt-decode";
 
 export const AuthContext = createContext();
 
@@ -8,15 +9,32 @@ export const AuthProvider = ({ children }) => {
       ? JSON.parse(localStorage.getItem("authTokens"))
       : null
   );
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() =>
+    localStorage.getItem("authTokens")
+      ? jwtDecode(JSON.parse(localStorage.getItem("authTokens")).access)
+      : null
+  );
 
-  // Save tokens to localStorage
+  // Save tokens + decode user
   useEffect(() => {
     if (authTokens) {
       localStorage.setItem("authTokens", JSON.stringify(authTokens));
+      setUser(jwtDecode(authTokens.access));
     } else {
       localStorage.removeItem("authTokens");
+      setUser(null);
     }
+  }, [authTokens]);
+
+  // Refresh tokens periodically
+  useEffect(() => {
+    if (!authTokens) return;
+
+    const refreshInterval = setInterval(() => {
+      refreshToken();
+    }, 4 * 60 * 1000); // every 4 min (if access token lives ~5min)
+
+    return () => clearInterval(refreshInterval);
   }, [authTokens]);
 
   const loginUser = async (username, password) => {
@@ -29,6 +47,7 @@ export const AuthProvider = ({ children }) => {
     if (response.ok) {
       const data = await response.json();
       setAuthTokens(data);
+      setUser(jwtDecode(data.access));
       return true;
     } else {
       alert("Login failed!");
@@ -36,9 +55,33 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Refresh token
+  const refreshToken = async () => {
+    if (!authTokens?.refresh) {
+      logoutUser();
+      return;
+    }
+
+    const response = await fetch("http://localhost:8000/api/token/refresh/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh: authTokens.refresh }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const updatedTokens = { ...authTokens, access: data.access };
+      setAuthTokens(updatedTokens);
+      setUser(jwtDecode(data.access));
+    } else {
+      logoutUser();
+    }
+  };
+
   const logoutUser = () => {
     setAuthTokens(null);
     setUser(null);
+    localStorage.removeItem("authTokens");
   };
 
   const contextData = {
@@ -46,6 +89,7 @@ export const AuthProvider = ({ children }) => {
     authTokens,
     loginUser,
     logoutUser,
+    isLoggedIn: !!authTokens,
   };
 
   return (
