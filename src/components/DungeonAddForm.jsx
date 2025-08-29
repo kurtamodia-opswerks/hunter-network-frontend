@@ -1,15 +1,24 @@
-import { useState } from "react";
-import { postData } from "../api/api.js";
-import { useAuthFetch } from "../hooks/useAuthFetch";
+import { useState, useEffect } from "react";
 
-export default function DungeonAddForm({ onAdd }) {
-  const authFetch = useAuthFetch();
-  const [form, setForm] = useState({
-    name: "",
-    location: "",
-    rank: "",
-    is_open: true,
-  });
+export default function DungeonAddForm({
+  onAdd,
+  initialForm,
+  isEdit,
+  onCancel,
+  editId,
+}) {
+  const [form, setForm] = useState(
+    initialForm || {
+      name: "",
+      location: "",
+      rank: "",
+      is_open: true,
+    }
+  );
+
+  useEffect(() => {
+    if (initialForm) setForm(initialForm);
+  }, [initialForm]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -21,19 +30,15 @@ export default function DungeonAddForm({ onAdd }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const url = "http://localhost:8000/api/dungeons/";
-    const newDungeon = await postData(url, form, authFetch);
-    if (newDungeon) {
-      onAdd(newDungeon);
+    await onAdd(form);
+    if (!isEdit) {
       setForm({ name: "", location: "", rank: "", is_open: true });
-    } else {
-      alert("Error adding dungeon");
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3>Add Dungeon</h3>
+      <h3>{isEdit ? "Edit Dungeon" : "Add Dungeon"}</h3>
       <input
         name="name"
         placeholder="Name"
@@ -64,7 +69,12 @@ export default function DungeonAddForm({ onAdd }) {
           onChange={handleChange}
         />
       </label>
-      <button type="submit">Add Dungeon</button>
+      <button type="submit">{isEdit ? "Update Dungeon" : "Add Dungeon"}</button>
+      {isEdit && (
+        <button type="button" onClick={onCancel}>
+          Cancel
+        </button>
+      )}
     </form>
   );
 }

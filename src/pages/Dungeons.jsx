@@ -1,14 +1,14 @@
 import { useEffect, useState, useContext } from "react";
-import { useAuthFetch } from "../hooks/useAuthFetch";
+import { postData, putData, deleteData } from "../api/api.js";
 import { AuthContext } from "../context/AuthContext.jsx";
 import DungeonAddForm from "../components/DungeonAddForm.jsx";
-import { putData, deleteData } from "../api/api.js";
+import { useAuthFetch } from "../hooks/useAuthFetch";
 
 export default function Dungeons() {
   const [dungeons, setDungeons] = useState([]);
-  const authFetch = useAuthFetch();
   const { isLoggedIn, user } = useContext(AuthContext);
   const [isAdmin, setIsAdmin] = useState(user ? user.is_admin : false);
+  const authFetch = useAuthFetch();
 
   // For editing
   const [editId, setEditId] = useState(null);
@@ -16,27 +16,30 @@ export default function Dungeons() {
 
   useEffect(() => {
     let isMounted = true;
-    const fetchDungeons = async () => {
-      if (!isLoggedIn) return;
-      const response = await authFetch("http://localhost:8000/api/dungeons/");
-      if (response.ok) {
+    let url = "http://localhost:8000/api/dungeons/";
+    authFetch(url)
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Failed to fetch dungeons");
         const data = await response.json();
-        if (!isMounted) return;
-        setDungeons(data);
-      } else {
-        console.error("Failed to fetch dungeons");
-      }
-    };
-
-    fetchDungeons();
-
+        if (isMounted) {
+          setDungeons(data);
+        }
+      })
+      .catch((error) => console.error("Error fetching data:", error));
     return () => {
       isMounted = false;
     };
-  }, [authFetch, isLoggedIn]);
+  }, []);
 
-  const handleAddDungeon = (newDungeon) => {
-    setDungeons((prev) => [...prev, newDungeon]);
+  // Add dungeon (POST)
+  const handleAddDungeon = async (form) => {
+    const url = "http://localhost:8000/api/dungeons/";
+    const newDungeon = await postData(url, form, authFetch);
+    if (newDungeon) {
+      setDungeons((prev) => [...prev, newDungeon]);
+    } else {
+      alert("Error adding dungeon");
+    }
   };
 
   // Start editing a dungeon
@@ -50,7 +53,7 @@ export default function Dungeons() {
     });
   };
 
-  // Submit edit
+  // Edit dungeon (PUT)
   const handleEditSubmit = async (form) => {
     const url = `http://localhost:8000/api/dungeons/${editId}/`;
     const updatedDungeon = await putData(url, form, authFetch);
@@ -112,6 +115,7 @@ export default function Dungeons() {
             onAdd={handleEditSubmit}
             initialForm={editForm}
             isEdit={true}
+            editId={editId}
             onCancel={() => {
               setEditId(null);
               setEditForm(null);

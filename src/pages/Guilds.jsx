@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { fetchData, putData, deleteData } from "../api/api.js";
+import { fetchData, postData, putData, deleteData } from "../api/api.js";
 import { AuthContext } from "../context/AuthContext.jsx";
 import GuildAddForm from "../components/GuildAddForm.jsx";
 import { useAuthFetch } from "../hooks/useAuthFetch";
@@ -29,8 +29,15 @@ export default function Guilds() {
     };
   }, []);
 
-  const handleAddGuild = (newGuild) => {
-    setGuilds((prev) => [...prev, newGuild]);
+  // Add guild (POST)
+  const handleAddGuild = async (form) => {
+    const url = "http://localhost:8000/api/guilds/";
+    const newGuild = await postData(url, form, authFetch);
+    if (newGuild) {
+      setGuilds((prev) => [...prev, newGuild]);
+    } else {
+      alert("Error adding guild");
+    }
   };
 
   // Start editing a guild
@@ -38,11 +45,11 @@ export default function Guilds() {
     setEditId(guild.id);
     setEditForm({
       name: guild.name,
-      leader: guild.leader,
+      leader: guild.leader_display.id || 0,
     });
   };
 
-  // Submit edit
+  // Edit guild (PUT)
   const handleEditSubmit = async (form) => {
     const url = `http://localhost:8000/api/guilds/${editId}/`;
     const updatedGuild = await putData(url, form, authFetch);
@@ -107,6 +114,7 @@ export default function Guilds() {
             onAdd={handleEditSubmit}
             initialForm={editForm}
             isEdit={true}
+            editId={editId}
             onCancel={() => {
               setEditId(null);
               setEditForm(null);

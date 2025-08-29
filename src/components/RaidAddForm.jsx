@@ -1,16 +1,25 @@
-import { useState } from "react";
-import { postData } from "../api/api.js";
-import { useAuthFetch } from "../hooks/useAuthFetch";
+import { useState, useEffect } from "react";
 
-export default function RaidAddForm({ onAdd }) {
-  const authFetch = useAuthFetch();
-  const [form, setForm] = useState({
-    name: "",
-    dungeon: 0,
-    date: "",
-    success: false,
-    participations_create: [],
-  });
+export default function RaidAddForm({
+  onAdd,
+  initialForm,
+  isEdit,
+  onCancel,
+  editId,
+}) {
+  const [form, setForm] = useState(
+    initialForm || {
+      name: "",
+      dungeon: 0,
+      date: "",
+      success: false,
+      participations_create: [],
+    }
+  );
+
+  useEffect(() => {
+    if (initialForm) setForm(initialForm);
+  }, [initialForm]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -38,10 +47,8 @@ export default function RaidAddForm({ onAdd }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const url = "http://localhost:8000/api/raids/";
-    const newRaid = await postData(url, form, authFetch);
-    if (newRaid) {
-      onAdd(newRaid);
+    await onAdd(form);
+    if (!isEdit) {
       setForm({
         name: "",
         dungeon: 0,
@@ -49,14 +56,12 @@ export default function RaidAddForm({ onAdd }) {
         success: false,
         participations_create: [],
       });
-    } else {
-      alert("Error adding raid");
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3>Add Raid</h3>
+      <h3>{isEdit ? "Edit Raid" : "Add Raid"}</h3>
       <input
         name="name"
         placeholder="Name"
@@ -113,7 +118,12 @@ export default function RaidAddForm({ onAdd }) {
       <button type="button" onClick={addParticipation}>
         Add Participation
       </button>
-      <button type="submit">Add Raid</button>
+      <button type="submit">{isEdit ? "Update Raid" : "Add Raid"}</button>
+      {isEdit && (
+        <button type="button" onClick={onCancel}>
+          Cancel
+        </button>
+      )}
     </form>
   );
 }

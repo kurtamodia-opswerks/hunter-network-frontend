@@ -1,14 +1,13 @@
 import { useEffect, useState, useContext } from "react";
-import { useAuthFetch } from "../hooks/useAuthFetch";
+import { postData, putData, deleteData } from "../api/api.js";
 import { AuthContext } from "../context/AuthContext.jsx";
-import { fetchAuthData, putData, deleteData } from "../api/api.js";
 import RaidAddForm from "../components/RaidAddForm.jsx";
+import { useAuthFetch } from "../hooks/useAuthFetch";
 
 export default function Raids() {
   const [raids, setRaids] = useState([]);
   const { isLoggedIn, user } = useContext(AuthContext);
   const [isAdmin, setIsAdmin] = useState(user ? user.is_admin : false);
-
   const authFetch = useAuthFetch();
 
   // For editing
@@ -17,22 +16,30 @@ export default function Raids() {
 
   useEffect(() => {
     let isMounted = true;
-    const url = "http://localhost:8000/api/raids/";
-    fetchAuthData(url, authFetch)
-      .then((data) => {
+    let url = "http://localhost:8000/api/raids/";
+    authFetch(url)
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Failed to fetch raids");
+        const data = await response.json();
         if (isMounted) {
           setRaids(data);
         }
       })
       .catch((error) => console.error("Error fetching data:", error));
-
     return () => {
       isMounted = false;
     };
-  }, [isLoggedIn]);
+  }, []);
 
-  const handleAddRaid = (newRaid) => {
-    setRaids((prev) => [...prev, newRaid]);
+  // Add raid (POST)
+  const handleAddRaid = async (form) => {
+    const url = "http://localhost:8000/api/raids/";
+    const newRaid = await postData(url, form, authFetch);
+    if (newRaid) {
+      setRaids((prev) => [...prev, newRaid]);
+    } else {
+      alert("Error adding raid");
+    }
   };
 
   // Start editing a raid
@@ -43,11 +50,11 @@ export default function Raids() {
       dungeon: raid.dungeon,
       date: raid.date,
       success: raid.success,
-      participations: raid.participations || [],
+      participations_create: raid.participations_create || [],
     });
   };
 
-  // Submit edit
+  // Edit raid (PUT)
   const handleEditSubmit = async (form) => {
     const url = `http://localhost:8000/api/raids/${editId}/`;
     const updatedRaid = await putData(url, form, authFetch);
@@ -109,6 +116,7 @@ export default function Raids() {
             onAdd={handleEditSubmit}
             initialForm={editForm}
             isEdit={true}
+            editId={editId}
             onCancel={() => {
               setEditId(null);
               setEditForm(null);

@@ -1,13 +1,22 @@
-import { useState } from "react";
-import { postData } from "../api/api.js";
-import { useAuthFetch } from "../hooks/useAuthFetch";
+import { useState, useEffect } from "react";
 
-export default function GuildAddForm({ onAdd }) {
-  const authFetch = useAuthFetch();
-  const [form, setForm] = useState({
-    name: "",
-    leader: 0,
-  });
+export default function GuildAddForm({
+  onAdd,
+  initialForm,
+  isEdit,
+  onCancel,
+  editId,
+}) {
+  const [form, setForm] = useState(
+    initialForm || {
+      name: "",
+      leader: 0,
+    }
+  );
+
+  useEffect(() => {
+    if (initialForm) setForm(initialForm);
+  }, [initialForm]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -16,27 +25,18 @@ export default function GuildAddForm({ onAdd }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const url = "http://localhost:8000/api/guilds/";
-      const newGuild = await postData(url, form, authFetch);
-      if (newGuild) {
-        onAdd(newGuild);
-        setForm({
-          name: "",
-          leader: 0,
-        });
-      } else {
-        alert("Error adding guild");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error adding guild");
+    await onAdd(form);
+    if (!isEdit) {
+      setForm({
+        name: "",
+        leader: 0,
+      });
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3>Add Guild</h3>
+      <h3>{isEdit ? "Edit Guild" : "Add Guild"}</h3>
       <input
         name="name"
         placeholder="Name"
@@ -52,7 +52,12 @@ export default function GuildAddForm({ onAdd }) {
         onChange={handleChange}
         required
       />
-      <button type="submit">Add Guild</button>
+      <button type="submit">{isEdit ? "Update Guild" : "Add Guild"}</button>
+      {isEdit && (
+        <button type="button" onClick={onCancel}>
+          Cancel
+        </button>
+      )}
     </form>
   );
 }

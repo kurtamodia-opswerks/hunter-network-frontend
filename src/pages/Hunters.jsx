@@ -90,7 +90,7 @@ export default function Hunters() {
           {hunters.map((hunter) => (
             <li key={hunter.id}>
               <strong>{hunter.full_name}</strong> ({hunter.rank_display}) —{" "}
-              {hunter.email}— Power: {hunter.power_level}— Raids:{" "}
+              Guild: {hunter.guild}— Power: {hunter.power_level}— Raids:{" "}
               {hunter.raid_count}
               {isAdmin && isLoggedIn && (
                 <>
