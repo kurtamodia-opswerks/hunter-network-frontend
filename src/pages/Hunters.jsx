@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { fetchData } from "../api/api.js";
+import { AuthContext } from "../context/AuthContext.jsx";
 
 export default function Hunters() {
   const [hunters, setHunters] = useState([]);
+  const { isLoggedIn } = useContext(AuthContext);
 
   useEffect(() => {
     let isMounted = true;

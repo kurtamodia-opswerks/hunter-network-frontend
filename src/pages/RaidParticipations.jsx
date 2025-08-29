@@ -1,34 +1,29 @@
 import { useEffect, useState, useContext } from "react";
 import { useAuthFetch } from "../hooks/useAuthFetch";
 import { AuthContext } from "../context/AuthContext.jsx";
+import { fetchAuthData } from "../api/api.js";
 
 export default function RaidParticipations() {
   const [participations, setParticipations] = useState([]);
-  const authFetch = useAuthFetch();
   const { isLoggedIn } = useContext(AuthContext);
+
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
     let isMounted = true;
-    const fetchParticipations = async () => {
-      if (!isLoggedIn) return;
-      const response = await authFetch(
-        "http://localhost:8000/api/raid-participations/"
-      );
-      if (response.ok) {
-        const data = await response.json();
-        if (!isMounted) return;
-        setParticipations(data);
-      } else {
-        console.error("Failed to fetch raid participations");
-      }
-    };
-
-    fetchParticipations();
+    const url = "http://localhost:8000/api/raid-participations/";
+    fetchAuthData(url, authFetch)
+      .then((data) => {
+        if (isMounted) {
+          setParticipations(data);
+        }
+      })
+      .catch((error) => console.error("Error fetching data:", error));
 
     return () => {
       isMounted = false;
     };
-  }, [authFetch, isLoggedIn]);
+  }, [isLoggedIn]);
 
   return (
     <section>
