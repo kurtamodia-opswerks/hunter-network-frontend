@@ -12,7 +12,10 @@ export default function Home() {
       <p>Manage hunters, guilds, raids, and more with ease.</p>
       {isLoggedIn ? (
         <p>
-          <strong>Welcome!{user.user_id}</strong>
+          <strong>
+            Welcome!{user.user_id}
+            {user.username}
+          </strong>
           <Logout />
         </p>
       ) : (

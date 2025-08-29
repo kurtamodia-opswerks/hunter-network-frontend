@@ -5,7 +5,8 @@ import HunterAddForm from "../components/HunterAddForm.jsx";
 
 export default function Hunters() {
   const [hunters, setHunters] = useState([]);
-  const { isLoggedIn } = useContext(AuthContext);
+  const { isLoggedIn, user } = useContext(AuthContext);
+  const [isAdmin, setIsAdmin] = useState(user ? user.is_admin : false);
 
   useEffect(() => {
     let isMounted = true;
@@ -45,9 +46,11 @@ export default function Hunters() {
           ))}
         </ul>
       </section>
-      <section className="hunter-add-form">
-        <HunterAddForm onAdd={handleAddHunter} />
-      </section>
+      {isAdmin && isLoggedIn && (
+        <section className="hunter-add-form">
+          <HunterAddForm onAdd={handleAddHunter} />
+        </section>
+      )}
     </>
   );
 }
