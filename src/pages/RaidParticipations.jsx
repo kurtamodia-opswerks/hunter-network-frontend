@@ -41,7 +41,8 @@ export default function RaidParticipations() {
         <ul>
           {participations.map((p) => (
             <li key={p.id}>
-              Raid: {p.raid} | Hunter: {p.hunter} | Role: {p.role}
+              Raid: {p.raid_id} | Hunter: {p.full_name} | Rank: {p.hunter_rank}{" "}
+              | Role: {p.role}
             </li>
           ))}
         </ul>

@@ -17,6 +17,12 @@ export default function Navbar() {
         <li>
           <Link to="/dungeons">Dungeons</Link>
         </li>
+        <li>
+          <Link to="/raids">Raids</Link>
+        </li>
+        <li>
+          <Link to="/raid-participations">Raid Participations</Link>
+        </li>
       </ul>
     </nav>
   );
