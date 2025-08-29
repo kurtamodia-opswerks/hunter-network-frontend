@@ -1,11 +1,13 @@
 import { useEffect, useState, useContext } from "react";
 import { useAuthFetch } from "../hooks/useAuthFetch";
 import { AuthContext } from "../context/AuthContext.jsx";
+import DungeonAddForm from "../components/DungeonAddForm.jsx";
 
 export default function Dungeons() {
   const [dungeons, setDungeons] = useState([]);
   const authFetch = useAuthFetch();
-  const { isLoggedIn } = useContext(AuthContext);
+  const { isLoggedIn, user } = useContext(AuthContext);
+  const [isAdmin, setIsAdmin] = useState(user ? user.is_admin : false);
 
   useEffect(() => {
     let isMounted = true;
@@ -28,6 +30,10 @@ export default function Dungeons() {
     };
   }, [authFetch, isLoggedIn]);
 
+  const handleAddDungeon = (newDungeon) => {
+    setDungeons((prev) => [...prev, newDungeon]);
+  };
+
   return (
     <section>
       <h2>Dungeons</h2>
@@ -46,6 +52,11 @@ export default function Dungeons() {
             </li>
           ))}
         </ul>
+      )}
+      {isAdmin && isLoggedIn && (
+        <section className="dungeon-add-form">
+          <DungeonAddForm onAdd={handleAddDungeon} />
+        </section>
       )}
     </section>
   );
