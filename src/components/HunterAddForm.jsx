@@ -1,23 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { postData } from "../api/api.js";
 import { useAuthFetch } from "../hooks/useAuthFetch";
 
-export default function HunterAddForm({ onAdd }) {
+export default function HunterAddForm({
+  onAdd,
+  initialForm,
+  isEdit,
+  onCancel,
+}) {
   const authFetch = useAuthFetch();
-  const [form, setForm] = useState({
-    email: "",
-    guild: 0,
-    skills: [0],
-    first_name: "",
-    last_name: "",
-    username: "",
-    password: "",
-    rank: "E",
-  });
+  const [form, setForm] = useState(
+    initialForm || {
+      email: "",
+      guild: 0,
+      skills: [0],
+      first_name: "",
+      last_name: "",
+      username: "",
+      password: "",
+      rank: "E",
+    }
+  );
+
+  useEffect(() => {
+    if (initialForm) setForm(initialForm);
+  }, [initialForm]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // For guild and skills, convert to number/array if needed
     if (name === "guild") {
       setForm({ ...form, guild: Number(value) });
     } else if (name === "skills") {
@@ -29,33 +39,24 @@ export default function HunterAddForm({ onAdd }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const url = "http://localhost:8000/api/hunters/";
-      const newHunter = await postData(url, form, authFetch);
-      if (newHunter) {
-        onAdd(newHunter);
-        setForm({
-          email: "",
-          guild: 0,
-          skills: [0],
-          first_name: "",
-          last_name: "",
-          username: "",
-          password: "",
-          rank: "E",
-        });
-      } else {
-        alert("Error adding hunter");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error adding hunter");
+    await onAdd(form);
+    if (!isEdit) {
+      setForm({
+        email: "",
+        guild: 0,
+        skills: [0],
+        first_name: "",
+        last_name: "",
+        username: "",
+        password: "",
+        rank: "E",
+      });
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3>Add Hunter</h3>
+      <h3>{isEdit ? "Edit Hunter" : "Add Hunter"}</h3>
       <input
         name="email"
         placeholder="Email"
@@ -106,7 +107,7 @@ export default function HunterAddForm({ onAdd }) {
         placeholder="Password"
         value={form.password}
         onChange={handleChange}
-        required
+        required={!isEdit}
       />
       <input
         name="rank"
@@ -115,7 +116,12 @@ export default function HunterAddForm({ onAdd }) {
         onChange={handleChange}
         required
       />
-      <button type="submit">Add Hunter</button>
+      <button type="submit">{isEdit ? "Update Hunter" : "Add Hunter"}</button>
+      {isEdit && (
+        <button type="button" onClick={onCancel}>
+          Cancel
+        </button>
+      )}
     </form>
   );
 }
