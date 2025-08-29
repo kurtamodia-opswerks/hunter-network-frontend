@@ -2,7 +2,7 @@ import { useState } from "react";
 import { postData } from "../api/api.js";
 import { useAuthFetch } from "../hooks/useAuthFetch";
 
-export default function HunterAddForm({ onAdd }) {
+export default function GuildAddForm({ onAdd }) {
   const authFetch = useAuthFetch();
   const [form, setForm] = useState({
     name: "",

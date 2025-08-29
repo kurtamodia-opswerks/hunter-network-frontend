@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { fetchData, putData, deleteData } from "../api/api.js";
+import { fetchData, postData, putData, deleteData } from "../api/api.js";
 import { AuthContext } from "../context/AuthContext.jsx";
 import HunterAddForm from "../components/HunterAddForm.jsx";
 import { useAuthFetch } from "../hooks/useAuthFetch";
@@ -29,8 +29,15 @@ export default function Hunters() {
     };
   }, []);
 
-  const handleAddHunter = (newHunter) => {
-    setHunters((prev) => [...prev, newHunter]);
+  // Add hunter (POST)
+  const handleAddHunter = async (form) => {
+    const url = "http://localhost:8000/api/hunters/";
+    const newHunter = await postData(url, form, authFetch);
+    if (newHunter) {
+      setHunters((prev) => [...prev, newHunter]);
+    } else {
+      alert("Error adding hunter");
+    }
   };
 
   // Start editing a hunter
@@ -48,7 +55,7 @@ export default function Hunters() {
     });
   };
 
-  // Submit edit
+  // Edit hunter (PUT)
   const handleEditSubmit = async (form) => {
     const url = `http://localhost:8000/api/hunters/${editId}/`;
     const updatedHunter = await putData(url, form, authFetch);
@@ -108,6 +115,7 @@ export default function Hunters() {
             onAdd={handleEditSubmit}
             initialForm={editForm}
             isEdit={true}
+            editId={editId}
             onCancel={() => {
               setEditId(null);
               setEditForm(null);

@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
-import { postData } from "../api/api.js";
-import { useAuthFetch } from "../hooks/useAuthFetch";
 
 export default function HunterAddForm({
   onAdd,
   initialForm,
   isEdit,
   onCancel,
+  editId,
 }) {
-  const authFetch = useAuthFetch();
   const [form, setForm] = useState(
     initialForm || {
       email: "",
