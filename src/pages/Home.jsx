@@ -6,26 +6,40 @@ import Logout from "../components/Logout.jsx";
 export default function Home() {
   const { isLoggedIn, user } = useContext(AuthContext);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
   // Callback for Login success
   const handleLoginSuccess = () => {
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+    setTimeout(() => setShowToast(false), 5000);
     setShowLoginModal(false);
+  };
+
+  const handleLogoutSuccess = () => {
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 5000);
+    setShowLogoutModal(false);
   };
 
   return (
     <>
-      <div className="hero bg-base-200 min-h-screen">
-        <div className="hero-content flex-col lg:flex-row-reverse">
-          <img
-            src="/home-background.png"
-            className="max-w-lg rounded-lg shadow-2xl"
-          />
+      <div
+        className="hero bg-base-200 min-h-screen relative"
+        style={{
+          backgroundImage: "url('/home-background.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {/* Overlay for opacity */}
+        <div className="absolute inset-0 bg-black opacity-40"></div>
+        <div className="hero-content flex-col lg:flex-row-reverse relative z-10">
           <div>
-            <h1 className="text-5xl font-bold">Welcome to Hunter Network</h1>
-            <p className="py-6">
+            <h1 className="text-5xl font-bold text-white">
+              Welcome to Hunter Network
+            </h1>
+            <p className="py-6 text-white">
               Your one-stop solution to manage hunters, guilds, raids, and more.
               Keep track of your guilds' rosters, plan your next raid, and
               record your progress. Hunter Network is free, open-source, and
@@ -39,14 +53,18 @@ export default function Home() {
                 Get Started
               </button>
             ) : (
-              <Logout />
+              <Logout onLogout={handleLogoutSuccess} />
             )}
 
             {/* Toast */}
             {showToast && (
               <div className="toast fixed top-4 left-1/2 -translate-x-1/2 z-50">
                 <div className="alert alert-info">
-                  <span>✅ Successfully logged in!</span>
+                  {isLoggedIn ? (
+                    <span>👋 Welcome back, {user.username}!</span>
+                  ) : (
+                    <span>👋 See you again!</span>
+                  )}
                 </div>
               </div>
             )}
