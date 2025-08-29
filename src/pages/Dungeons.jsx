@@ -8,11 +8,13 @@ export default function Dungeons() {
   const { isLoggedIn } = useContext(AuthContext);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchDungeons = async () => {
       if (!isLoggedIn) return; // prevent fetch if not logged in
       const response = await authFetch("http://localhost:8000/api/dungeons/");
       if (response.ok) {
         const data = await response.json();
+        if (!isMounted) return;
         setDungeons(data);
       } else {
         console.error("Failed to fetch dungeons");
@@ -20,6 +22,10 @@ export default function Dungeons() {
     };
 
     fetchDungeons();
+
+    return () => {
+      isMounted = false;
+    };
   }, [authFetch, isLoggedIn]);
 
   return (

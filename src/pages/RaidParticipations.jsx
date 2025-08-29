@@ -8,6 +8,7 @@ export default function RaidParticipations() {
   const { isLoggedIn } = useContext(AuthContext);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchParticipations = async () => {
       if (!isLoggedIn) return;
       const response = await authFetch(
@@ -15,6 +16,7 @@ export default function RaidParticipations() {
       );
       if (response.ok) {
         const data = await response.json();
+        if (!isMounted) return;
         setParticipations(data);
       } else {
         console.error("Failed to fetch raid participations");
@@ -22,6 +24,10 @@ export default function RaidParticipations() {
     };
 
     fetchParticipations();
+
+    return () => {
+      isMounted = false;
+    };
   }, [authFetch, isLoggedIn]);
 
   return (

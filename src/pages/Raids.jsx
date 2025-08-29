@@ -8,11 +8,13 @@ export default function Raids() {
   const { isLoggedIn } = useContext(AuthContext);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchRaids = async () => {
       if (!isLoggedIn) return;
       const response = await authFetch("http://localhost:8000/api/raids/");
       if (response.ok) {
         const data = await response.json();
+        if (!isMounted) return;
         setRaids(data);
       } else {
         console.error("Failed to fetch raids");
@@ -20,6 +22,10 @@ export default function Raids() {
     };
 
     fetchRaids();
+
+    return () => {
+      isMounted = false;
+    };
   }, [authFetch, isLoggedIn]);
 
   return (
