@@ -71,6 +71,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       setAuthTokens(data);
       setUser(jwtDecode(data.access));
+      console.log(user);
       return true;
     } else {
       alert("Login failed!");

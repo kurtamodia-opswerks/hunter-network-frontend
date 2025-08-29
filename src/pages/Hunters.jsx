@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { fetchData } from "../api/api.js";
 import { AuthContext } from "../context/AuthContext.jsx";
+import HunterAddForm from "../components/HunterAddForm.jsx";
 
 export default function Hunters() {
   const [hunters, setHunters] = useState([]);
@@ -24,19 +25,29 @@ export default function Hunters() {
     };
   }, []);
 
+  const handleAddHunter = (newHunter) => {
+    setHunters((prev) => [...prev, newHunter]);
+  };
+
   return (
-    <section>
-      <h2>Hunters</h2>
-      <p>This is the Hunters Page, where you can manage your hunters.</p>
-      <ul>
-        {hunters.map((hunter) => (
-          <li key={hunter.id}>
-            <strong>{hunter.full_name}</strong> ({hunter.rank_display}) —{" "}
-            {hunter.email}— Power: {hunter.power_level}— Raids:{" "}
-            {hunter.raid_count}
-          </li>
-        ))}
-      </ul>
-    </section>
+    <>
+      {" "}
+      <section className="hunters-list">
+        <h2>Hunters</h2>
+        <p>This is the Hunters Page, where you can manage your hunters.</p>
+        <ul>
+          {hunters.map((hunter) => (
+            <li key={hunter.id}>
+              <strong>{hunter.full_name}</strong> ({hunter.rank_display}) —{" "}
+              {hunter.email}— Power: {hunter.power_level}— Raids:{" "}
+              {hunter.raid_count}
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section className="hunter-add-form">
+        <HunterAddForm onAdd={handleAddHunter} />
+      </section>
+    </>
   );
 }
