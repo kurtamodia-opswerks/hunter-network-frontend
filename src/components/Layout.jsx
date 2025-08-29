@@ -9,7 +9,7 @@ export default function Layout() {
       <main className="main-content">
         <Outlet />
       </main>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

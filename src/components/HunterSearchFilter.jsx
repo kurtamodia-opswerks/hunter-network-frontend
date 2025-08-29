@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+const RANKS = ["E", "D", "C", "B", "A", "S"];
+
 export default function HunterSearchFilter({ onFilter }) {
   const [search, setSearch] = useState("");
   const [rank, setRank] = useState("");
@@ -17,16 +19,53 @@ export default function HunterSearchFilter({ onFilter }) {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      <select value={rank} onChange={(e) => setRank(e.target.value)}>
-        <option value="">All Ranks</option>
-        <option value="E">E</option>
-        <option value="D">D</option>
-        <option value="C">C</option>
-        <option value="B">B</option>
-        <option value="A">A</option>
-        <option value="S">S</option>
-      </select>
-      <button type="submit">Filter</button>
+      {/* Custom Dropdown for Rank */}
+      <div
+        className="dropdown dropdown-start"
+        style={{ display: "inline-block", marginLeft: "1rem" }}
+      >
+        <div tabIndex={0} role="button" className="btn m-1">
+          {rank ? `Rank: ${rank}` : "All Ranks"}
+        </div>
+        <ul
+          tabIndex={0}
+          className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+        >
+          <li>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setRank("");
+              }}
+              className={!rank ? "font-bold" : ""}
+            >
+              All Ranks
+            </a>
+          </li>
+          {RANKS.map((r) => (
+            <li key={r}>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setRank(r);
+                }}
+                className={rank === r ? "font-bold" : ""}
+              >
+                {r}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <button
+        type="submit"
+        className="btn btn-soft sm:btn-sm md:btn-md lg:btn-md xl:btn-md"
+        style={{ marginLeft: "1rem" }}
+      >
+        Filter
+      </button>
     </form>
   );
 }
