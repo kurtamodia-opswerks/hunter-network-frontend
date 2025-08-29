@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { postData } from "../api/api.js";
+import { useAuthFetch } from "../hooks/useAuthFetch";
 
 export default function HunterAddForm({ onAdd }) {
+  const authFetch = useAuthFetch();
   const [form, setForm] = useState({
     email: "",
     guild: 0,
@@ -29,8 +31,8 @@ export default function HunterAddForm({ onAdd }) {
     e.preventDefault();
     try {
       const url = "http://localhost:8000/api/hunters/";
-      const newHunter = await postData(url, form);
-      if (newHunter && newHunter.id) {
+      const newHunter = await postData(url, form, authFetch);
+      if (newHunter) {
         onAdd(newHunter);
         setForm({
           email: "",

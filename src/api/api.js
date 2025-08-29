@@ -22,19 +22,23 @@ export const fetchAuthData = async (url, authFetch) => {
   }
 };
 
-export const postData = async (url, data) => {
+export const postData = async (url, data, authFetch) => {
   try {
-    const response = await fetch(url, {
+    const options = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
-    });
+    };
+    const response = await authFetch(url, options);
     const responseData = await response.json();
+    if (!response.ok) {
+      throw new Error(responseData?.detail || "Failed to add hunter");
+    }
     return responseData;
   } catch (error) {
     console.error("Error posting data:", error);
-    throw error;
+    return null;
   }
 };
