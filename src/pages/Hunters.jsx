@@ -2,6 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import { fetchData, postData, putData, deleteData } from "../api/api.js";
 import { AuthContext } from "../context/AuthContext.jsx";
 import HunterAddForm from "../components/HunterAddForm.jsx";
+import HunterSearchFilter from "../components/HunterSearchFilter.jsx";
 import { useAuthFetch } from "../hooks/useAuthFetch";
 
 export default function Hunters() {
@@ -14,9 +15,26 @@ export default function Hunters() {
   const [editId, setEditId] = useState(null);
   const [editForm, setEditForm] = useState(null);
 
+  // For search/filter
+  const [filterParams, setFilterParams] = useState({});
+
+  // Fetch hunters with filter/search
   useEffect(() => {
     let isMounted = true;
     let url = "http://localhost:8000/api/hunters/";
+
+    // Build query string
+    const params = [];
+    if (filterParams.search) {
+      params.push(`search=${encodeURIComponent(filterParams.search)}`);
+    }
+    if (filterParams.rank) {
+      params.push(`rank=${encodeURIComponent(filterParams.rank)}`);
+    }
+    if (params.length) {
+      url += "?" + params.join("&");
+    }
+
     fetchData(url)
       .then((data) => {
         if (isMounted) {
@@ -27,7 +45,7 @@ export default function Hunters() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [filterParams]);
 
   // Add hunter (POST)
   const handleAddHunter = async (form) => {
@@ -81,16 +99,22 @@ export default function Hunters() {
     }
   };
 
+  // Handle filter/search
+  const handleFilter = (params) => {
+    setFilterParams(params);
+  };
+
   return (
     <>
       <section className="hunters-list">
         <h2>Hunters</h2>
         <p>This is the Hunters Page, where you can manage your hunters.</p>
+        <HunterSearchFilter onFilter={handleFilter} />
         <ul>
           {hunters.map((hunter) => (
             <li key={hunter.id}>
               <strong>{hunter.full_name}</strong> ({hunter.rank_display}) —{" "}
-              Guild: {hunter.guild}— Power: {hunter.power_level}— Raids:{" "}
+              {hunter.email}— Power: {hunter.power_level}— Raids:{" "}
               {hunter.raid_count}
               {isAdmin && isLoggedIn && (
                 <>
